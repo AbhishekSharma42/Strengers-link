@@ -4,3 +4,82 @@
 body[data-theme="light"]{background:#f3f6fc;color:#172033}body[data-theme="light"] .app-shell{color:#172033}body[data-theme="light"] .topbar{border-color:#dfe5f0}body[data-theme="light"] .brand{color:#172033}body[data-theme="light"] .top-status{background:#fff;color:#526078;border-color:#e0e6f0}body[data-theme="light"] .header-tag{color:#6c5ce7}body[data-theme="light"] .header-action{background:#fff;color:#344056;border-color:#dfe5f0}body[data-theme="light"] .intro p{color:#66738a}body[data-theme="light"] .mode-switch{background:#fff;border-color:#e0e6f0}body[data-theme="light"] .mode{color:#5c6880}body[data-theme="light"] .mode.active{background:#eeeaff;color:#5949d6;box-shadow:inset 0 0 0 1px #c9c1ff}body[data-theme="light"] .video-card{border-color:#dfe5f0;background:#e8edf6}body[data-theme="light"] .remote-card{background:linear-gradient(145deg,#e2e9f5,#cbd5e6)}body[data-theme="light"] .local-card{background:linear-gradient(145deg,#e8edf6,#d8e1ef)}body[data-theme="light"] .video-feed{background:#d9e1ef}body[data-theme="light"] .video-label{background:#172033b8;color:#fff;border-color:#ffffff40}body[data-theme="light"] .video-footer{color:#fff}body[data-theme="light"] .video-placeholder{color:#26334a}body[data-theme="light"] .video-placeholder span{color:#63728b}body[data-theme="light"] .placeholder-icon{background:#7664f014;border-color:#7664f02a;color:#6c5ce7}body[data-theme="light"] .local-overlay{color:#5c6880}body[data-theme="light"] .control-button,body[data-theme="light"] .end-button{background:#fff;color:#344056;border-color:#dfe5f0}body[data-theme="light"] .end-button{background:#fff0f2;color:#c02d51;border-color:#f5d4dc}body[data-theme="light"] .status-line{color:#526078}body[data-theme="light"] .notice{background:#fff;color:#536178;border-color:#e0e6f0}body[data-theme="light"] .video-layout-controls>span{color:#63718a}body[data-theme="light"] .layout-option{background:#fff;color:#526078;border-color:#dfe5f0}body[data-theme="light"] .layout-option.active{background:#eeeaff;color:#5949d6;border-color:#bdb3ff}body[data-theme="light"] .chat-panel{background:#fff;border-color:#dfe5f0;color:#172033;box-shadow:-20px 0 60px #17203320}body[data-theme="light"] .chat-header{border-color:#e6ebf3}body[data-theme="light"] .chat-header p{color:#738099}body[data-theme="light"] .chat-safety{background:#f3f0ff;color:#5f51b7}body[data-theme="light"] .messages{background:#fff}body[data-theme="light"] .empty-chat{color:#68758b}body[data-theme="light"] .empty-chat strong{color:#27334a}body[data-theme="light"] .empty-chat-icon{background:#f0edff;border-color:#e0dbff;color:#6c5ce7}body[data-theme="light"] .system-message{background:#f0f3f9;color:#65718a}body[data-theme="light"] .message.incoming span{background:#edf1f8;color:#29364e}body[data-theme="light"] .message-form{border-color:#e6ebf3}body[data-theme="light"] .message-form input{background:#f7f9fc;color:#172033;border-color:#dfe5f0}body[data-theme="light"] .message-form input::placeholder{color:#8b97aa}body[data-theme="light"] .report-button{color:#5c6880;border-color:#e0e6f0}body[data-theme="light"] .footer{border-color:#dfe5f0;color:#7a869a}body[data-theme="light"] .footer a{color:#64728a}body[data-theme="light"] .footer-note{color:#6c5ce7}
 @media(max-width:760px){.header-actions{gap:6px}.header-action{padding:9px}.header-action span{display:none}.header-tag{display:none}.top-status{margin-left:auto}.header-actions{margin-left:0}.video-layout-controls{gap:5px}.video-layout-controls>span{width:100%;margin-bottom:2px}.layout-option{padding:8px;font-size:9px}.video-grid.layout-stranger .remote-card,.video-grid.layout-self .local-card{min-height:230px}.video-grid.layout-stranger .local-card,.video-grid.layout-self .remote-card{width:31%;right:8px;bottom:8px}.mobile-chat-button{display:flex}.call-controls{flex-wrap:wrap}.chat-panel{width:min(420px,100vw);border-radius:0}.footer{border-color:#ffffff12}body[data-theme="light"] .footer{border-color:#dfe5f0}}
 @media(max-width:390px){.video-layout-controls{align-items:stretch}.layout-option{flex:1;justify-content:center}.video-grid.layout-stranger .remote-card,.video-grid.layout-self .local-card{min-height:210px}.video-grid.layout-stranger .local-card,.video-grid.layout-self .remote-card{min-width:95px;width:32%}.header-action{padding:8px}.topbar{gap:8px}}
+
+
+/* Responsive width and viewport-fit layout correction */
+html, body, #root { width: 100%; min-width: 320px; min-height: 100%; }
+body { overflow-x: hidden; }
+.app-shell { width: 100%; max-width: none; margin: 0; padding-inline: clamp(12px, 2.2vw, 36px); }
+.layout { display: block; width: 100%; min-width: 0; padding-block: clamp(16px, 2.5vh, 30px) 24px; }
+.main-column { width: 100%; min-width: 0; }
+.video-grid { width: 100%; min-width: 0; }
+.video-card { min-width: 0; }
+/* Stacked mode uses two equal rows inside the available viewport instead of two oversized 16:9 cards. */
+.video-grid.layout-stacked { height: clamp(320px, calc(100dvh - 340px), 900px); max-height: calc(100dvh - 250px); grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: clamp(8px, 1.2vw, 14px); }
+.video-grid.layout-stacked .video-card { width: 100%; height: 100%; min-height: 0; max-height: none; aspect-ratio: auto; }
+.video-grid.layout-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.video-grid.layout-side .video-card { aspect-ratio: 16 / 10; min-height: 220px; }
+.video-grid.layout-stranger, .video-grid.layout-self { width: 100%; min-height: 0; }
+.video-grid.layout-stranger .remote-card, .video-grid.layout-self .local-card { width: 100%; height: clamp(360px, calc(100dvh - 330px), 900px); min-height: 0; max-height: calc(100dvh - 230px); aspect-ratio: auto; }
+.call-controls { min-width: 0; flex-wrap: wrap; }
+.footer { width: 100%; }
+@media (max-width: 760px) {
+  .app-shell { padding-inline: 12px; }
+  .layout { padding-top: 16px; }
+  .video-grid.layout-side { grid-template-columns: minmax(0, 1fr); }
+  .video-grid.layout-side .video-card { aspect-ratio: 16 / 10; min-height: 0; }
+  .video-grid.layout-stacked { height: clamp(360px, calc(100dvh - 300px), 720px); max-height: calc(100dvh - 220px); grid-template-rows: repeat(2, minmax(0, 1fr)); }
+  .video-grid.layout-stacked .video-card { min-height: 0; aspect-ratio: auto; }
+  .video-grid.layout-stranger .remote-card, .video-grid.layout-self .local-card { height: clamp(320px, calc(100dvh - 290px), 720px); max-height: calc(100dvh - 200px); min-height: 0; }
+  .video-grid.layout-stranger .local-card, .video-grid.layout-self .remote-card { min-height: 0; }
+  .call-controls { justify-content: stretch; }
+  .primary-button { min-width: 130px; }
+}
+@media (max-height: 650px) {
+  .video-grid.layout-stacked { height: calc(100dvh - 270px); min-height: 260px; }
+  .video-grid.layout-stacked .video-card { min-height: 0; }
+  .video-grid.layout-stranger .remote-card, .video-grid.layout-self .local-card { height: calc(100dvh - 270px); min-height: 260px; }
+}
+
+
+/* Age gate: block the app until the visitor confirms they are 18+. */
+.age-gate-screen{min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top,#e8e5ff 0,#f4f6fb 45%,#edf1f8 100%);color:#172033}
+.age-gate-card{width:min(100%,480px);padding:clamp(24px,5vw,42px);border:1px solid #dce3f0;border-radius:24px;background:#fff;box-shadow:0 24px 80px #1c2b4a18;text-align:center}
+.age-gate-icon{width:64px;height:64px;margin:0 auto 18px;display:grid;place-items:center;border-radius:20px;background:#f0edff;color:#6655e8}
+.age-gate-eyebrow{margin:0 0 10px;color:#6b5be7;font-size:11px;font-weight:800;letter-spacing:1.8px}
+.age-gate-card h1{margin:0 0 12px;font-size:clamp(26px,5vw,34px);letter-spacing:-.8px}
+.age-gate-card p{margin:0 auto 22px;max-width:360px;color:#68758b;font-size:14px;line-height:1.7}
+.age-gate-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0}
+.age-gate-actions button{min-height:48px;border-radius:12px;padding:12px;font-size:13px;font-weight:800;border:1px solid #dfe5f0;cursor:pointer}
+.age-no-button{background:#fff;color:#5e687b}.age-yes-button{background:#6857e8;color:#fff;border-color:#6857e8!important}.age-gate-warning{margin:18px 0 22px;padding:14px;border:1px solid #f1d5a8;border-radius:12px;background:#fff8eb;color:#825b1b;font-size:13px;line-height:1.6;text-align:left}.age-gate-card small{display:block;color:#929bad;font-size:11px;line-height:1.6}
+.floating-chat-toggle{position:fixed;z-index:35;right:22px;bottom:22px;display:flex;align-items:center;justify-content:center;gap:9px;min-height:50px;padding:0 18px;border:0;border-radius:999px;background:#6857e8;color:#fff;box-shadow:0 10px 32px #5442d64d;font-size:13px;font-weight:800;cursor:pointer;transition:transform .15s,background .15s}.floating-chat-toggle:hover{transform:translateY(-2px);background:#5745d5}.floating-chat-toggle.is-open{background:#252d40}.chat-panel{z-index:40}.chat-backdrop{z-index:39}
+@media(max-width:760px){.floating-chat-toggle{right:14px;bottom:14px;min-height:48px;padding:0 16px}.age-gate-card{border-radius:20px}.age-gate-actions{grid-template-columns:1fr}}
+
+/* Video framing correction: keep the call area bounded and prevent camera feeds from being cropped. */
+.app-shell { width: 100%; max-width: 1440px; margin: 0 auto; padding-inline: clamp(12px, 2.2vw, 36px); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; min-width: 0; }
+.video-grid { width: 100%; min-width: 0; align-items: stretch; }
+.video-feed { object-fit: contain; }
+.video-grid.layout-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.video-grid.layout-side .video-card { width: 100%; height: auto; min-height: 0; aspect-ratio: 16 / 10; }
+.video-grid.layout-stacked { height: auto; max-height: none; grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+.video-grid.layout-stacked .video-card { width: 100%; height: auto; min-height: 0; aspect-ratio: 16 / 9; }
+.video-grid.layout-stranger, .video-grid.layout-self { display: grid; grid-template-columns: minmax(0, 1fr); position: relative; height: auto; min-height: 0; }
+.video-grid.layout-stranger .remote-card, .video-grid.layout-self .local-card { position: relative; grid-column: 1; grid-row: 1; width: 100%; height: auto; max-height: none; min-height: 0; aspect-ratio: 16 / 9; }
+.video-grid.layout-stranger .local-card, .video-grid.layout-self .remote-card { position: absolute; z-index: 4; right: 12px; bottom: 12px; grid-column: auto; grid-row: auto; width: clamp(100px, 22%, 220px); min-width: 0; height: auto; max-height: none; min-height: 0; aspect-ratio: 4 / 3; }
+@media (max-width: 760px) {
+  .app-shell { padding-inline: 10px; }
+  .layout { display: block; padding-top: 14px; }
+  .video-grid.layout-side { grid-template-columns: minmax(0, 1fr); }
+  .video-grid.layout-side .video-card { aspect-ratio: 16 / 10; }
+  .video-grid.layout-stacked { height: auto; max-height: none; }
+  .video-grid.layout-stacked .video-card { aspect-ratio: 16 / 9; }
+  .video-grid.layout-stranger .remote-card, .video-grid.layout-self .local-card { aspect-ratio: 4 / 3; }
+  .video-grid.layout-stranger .local-card, .video-grid.layout-self .remote-card { width: clamp(92px, 30%, 140px); right: 8px; bottom: 8px; }
+  .call-controls { justify-content: center; }
+}
+@media (max-width: 390px) {
+  .video-grid.layout-side .video-card { aspect-ratio: 4 / 3; }
+  .video-grid.layout-stranger .remote-card, .video-grid.layout-self .local-card { aspect-ratio: 4 / 3; }
+  .video-grid.layout-stranger .local-card, .video-grid.layout-self .remote-card { width: 96px; }
+}
