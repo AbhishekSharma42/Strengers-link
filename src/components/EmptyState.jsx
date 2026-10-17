@@ -1,0 +1,1 @@
+export default function EmptyState({title="No data found",text="There is nothing to show here yet."}){return <div className="rounded-2xl border border-dashed bg-white p-12 text-center"><b>{title}</b><p className="mt-1 text-sm text-slate-400">{text}</p></div>}

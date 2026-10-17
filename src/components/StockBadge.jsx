@@ -1,0 +1,1 @@
+import{stockStatus}from"../utils/calculations";export default function StockBadge({value,limit}){const s=stockStatus(value,limit),c=s==="In Stock"?"bg-emerald-50 text-emerald-700":s==="Low Stock"?"bg-amber-50 text-amber-700":"bg-red-50 text-red-700";return <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${c}`}>{s}</span>}
