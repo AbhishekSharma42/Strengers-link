@@ -31,6 +31,8 @@ export default function App() {
     try { return localStorage.getItem('strangerlink-age-status') || 'prompt'; } catch { return 'prompt'; }
   });
   const [localMediaReady, setLocalMediaReady] = useState(false);
+  const [permissionStage, setPermissionStage] = useState('');
+  const permissionTimer = useRef(null);
   const localVideo = useRef(null);
   const remoteVideo = useRef(null);
   const localStream = useRef(null);
@@ -156,6 +158,7 @@ export default function App() {
   }, []); // one socket lifecycle per page
 
   useEffect(() => { chatEnd.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => () => { if (permissionTimer.current) window.clearTimeout(permissionTimer.current); }, []);
 
   useEffect(() => {
     try { localStorage.setItem('strangerlink-theme', theme); } catch {}
@@ -164,18 +167,45 @@ export default function App() {
 
   useEffect(() => { try { localStorage.setItem('strangerlink-video-layout', videoLayout); } catch {} }, [videoLayout]);
 
-  const start = async () => {
+  const joinChatQueue = () => {
     if (!socket?.connected) { setNotice('Chat server is offline. Start the backend and refresh.'); return; }
     stopPeer();
-    if (mode === 'video') {
-      try { await ensureLocalMedia(); }
-      catch { setNotice('Allow camera and microphone access to use video chat.'); return; }
-    }
     queued.current = true;
     setSearching(true);
     setStatus('Looking for someone…');
     setNotice('Searching for an available stranger.');
     socket.emit('match:join', { mode });
+  };
+
+  const start = () => {
+    if (!socket?.connected) { setNotice('Chat server is offline. Start the backend and refresh.'); return; }
+    if (mode === 'video' && !localStream.current) {
+      if (permissionTimer.current) window.clearTimeout(permissionTimer.current);
+      setPermissionStage('waiting');
+      permissionTimer.current = window.setTimeout(() => setPermissionStage('prompt'), 2500);
+      return;
+    }
+    if (mode === 'video' && !localStream.current) return;
+    joinChatQueue();
+  };
+
+  const requestMediaAndStart = async () => {
+    setPermissionStage('requesting');
+    try {
+      await ensureLocalMedia();
+      setPermissionStage('');
+      joinChatQueue();
+    } catch (e) {
+      setPermissionStage('');
+      setNotice(e?.name === 'NotAllowedError' ? 'Camera/microphone permission was denied. Allow access in your browser and press Start again.' : 'Could not start camera/microphone. Check your device settings.');
+    }
+  };
+
+  const cancelPermission = () => {
+    if (permissionTimer.current) window.clearTimeout(permissionTimer.current);
+    permissionTimer.current = null;
+    setPermissionStage('');
+    setNotice('Camera and microphone were not requested. Press Start Video whenever you are ready.');
   };
 
   const next = async () => {
@@ -246,7 +276,7 @@ export default function App() {
     </main>;
   }
 
-  return <div className="app-shell">
+  return <div className={`app-shell ${permissionStage === 'prompt' || permissionStage === 'requesting' ? 'permission-open' : ''}`}>
     <header className="topbar">
       <a className="brand" href="#"><span className="brand-icon"><Video size={21}/></span><span>stranger<span className="brand-accent">link</span></span></a>
       <div className="top-status"><span className="live-dot"/>{socket?.connected ? 'Service online' : 'Connecting…'}</div>
@@ -316,5 +346,26 @@ export default function App() {
     </main>
     <button className={`floating-chat-toggle ${chatOpen ? 'is-open' : ''}`} onClick={() => setChatOpen(v => !v)} aria-expanded={chatOpen} aria-label={chatOpen ? 'Close chat' : 'Open chat'}><MessageCircle size={20}/><span>{chatOpen ? 'Close chat' : 'Chat now'}</span>{chatOpen ? <X size={16}/> : null}</button>
     <footer className="footer"><span>© {new Date().getFullYear()} StrangerLink</span><div><a href="#safety">Safety first</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a></div><span className="footer-note">Be kind. Stay safe.</span></footer>
+    {permissionStage === 'prompt' && <div className="permission-overlay" role="presentation">
+      <section className="permission-dialog" role="dialog" aria-modal="true" aria-labelledby="permission-title">
+        <div className="permission-icon"><Camera size={24}/><Mic size={20}/></div>
+        <p className="permission-eyebrow">READY FOR VIDEO CHAT?</p>
+        <h2 id="permission-title">Allow camera and microphone</h2>
+        <p>To start a video chat, StrangerLink needs access to your camera and microphone. Your browser will show its own permission prompt next.</p>
+        <div className="permission-actions">
+          <button className="permission-cancel" onClick={cancelPermission}>Not now</button>
+          <button className="permission-allow" onClick={requestMediaAndStart}>Allow &amp; continue</button>
+        </div>
+        <small>You can deny access in your browser at any time.</small>
+      </section>
+    </div>}
+    {permissionStage === 'requesting' && <div className="permission-overlay" role="presentation">
+      <section className="permission-dialog permission-wait-dialog" role="status" aria-live="polite">
+        <div className="permission-icon"><Camera size={24}/><Mic size={20}/></div>
+        <h2>Waiting for permission…</h2>
+        <p>Please choose Allow in your browser’s camera and microphone prompt.</p>
+        <button className="permission-cancel" onClick={cancelPermission}>Cancel</button>
+      </section>
+    </div>}
   </div>;
 }
