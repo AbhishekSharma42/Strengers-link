@@ -43,6 +43,11 @@ const waiting = [];
 const sessions = new Map(); // socketId -> { partnerId, mode, lastMessageAt, lastJoinAt }
 const messageCounters = new Map();
 
+function broadcastOnlineCount() {
+  // Count active Socket.IO connections currently connected to this server.
+  io.emit('online:count', { count: sessions.size });
+}
+
 function safeRemoveFromQueue(id) {
   for (let i = waiting.length - 1; i >= 0; i--) {
     if (waiting[i].id === id) waiting.splice(i, 1);
@@ -92,6 +97,7 @@ function allowMessage(id) {
 io.on('connection', socket => {
   sessions.set(socket.id, { partnerId: null, mode: 'video', lastMessageAt: 0, lastJoinAt: 0 });
   socket.emit('server:ready', { id: socket.id });
+  broadcastOnlineCount();
 
   socket.on('match:join', payload => {
     const session = sessions.get(socket.id);
@@ -172,6 +178,7 @@ io.on('connection', socket => {
     unlink(socket.id, 'left');
     sessions.delete(socket.id);
     messageCounters.delete(socket.id);
+    broadcastOnlineCount();
   });
 });
 

@@ -16,6 +16,7 @@ export default function App() {
   const [socket, setSocket] = useState(null);
   const [status, setStatus] = useState('Ready to meet someone new');
   const [connected, setConnected] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
   const [searching, setSearching] = useState(false);
   const [mode, setMode] = useState('video');
   const [cameraOn, setCameraOn] = useState(true);
@@ -26,6 +27,9 @@ export default function App() {
   const [theme, setTheme] = useState(() => { try { return localStorage.getItem('strangerlink-theme') || 'light'; } catch { return 'light'; } });
   const [videoLayout, setVideoLayout] = useState(() => { try { return localStorage.getItem('strangerlink-video-layout') || 'side'; } catch { return 'side'; } });
   const [chatOpen, setChatOpen] = useState(false);
+  const [ageStatus, setAgeStatus] = useState(() => {
+    try { return localStorage.getItem('strangerlink-age-status') || 'prompt'; } catch { return 'prompt'; }
+  });
   const [localMediaReady, setLocalMediaReady] = useState(false);
   const localVideo = useRef(null);
   const remoteVideo = useRef(null);
@@ -97,6 +101,10 @@ export default function App() {
     const s = io(SERVER_URL, { transports: ['websocket', 'polling'] });
     setSocket(s);
     s.on('connect', () => setNotice('Server connected. Press Start to find a stranger.'));
+    s.on('online:count', payload => {
+      const count = Number(payload?.count);
+      if (Number.isFinite(count) && count >= 0) setOnlineCount(count);
+    });
     s.on('connect_error', () => setNotice('Cannot reach the chat server. Check that the backend is running.'));
     s.on('queue:waiting', () => { setSearching(true); setConnected(false); setStatus('Looking for someone…'); });
     s.on('match:found', async ({ partnerId: partner, initiator, partnerMode }) => {
@@ -216,11 +224,33 @@ export default function App() {
     leave();
   };
 
+  if (ageStatus !== 'verified') {
+    const denied = ageStatus === 'denied';
+    return <main className="age-gate-screen">
+      <section className="age-gate-card" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+        <div className="age-gate-icon"><ShieldAlert size={30}/></div>
+        <p className="age-gate-eyebrow">STRANGERLINK · AGE CHECK</p>
+        <h1 id="age-gate-title">{denied ? 'Access blocked' : 'Are you 18 or older?'}</h1>
+        {denied ? <>
+          <p>You selected “No”, so StrangerLink is locked on this browser. Your choice is saved in this browser’s local storage.</p>
+          <div className="age-gate-warning">You cannot continue from this screen. To reset this choice, you must clear this website’s local storage/site data in your browser settings. Then reload the website.</div>
+        </> : <>
+          <p>StrangerLink is intended only for adults aged 18 and over. Please confirm your age before entering.</p>
+          <div className="age-gate-actions">
+            <button className="age-no-button" onClick={() => { try { localStorage.setItem('strangerlink-age-status', 'denied'); } catch {} setAgeStatus('denied'); }}>No, I’m under 18</button>
+            <button className="age-yes-button" onClick={() => { try { localStorage.setItem('strangerlink-age-status', 'verified'); } catch {} setAgeStatus('verified'); }}>Yes, I’m 18+</button>
+          </div>
+        </>}
+        <small>This is a self-declared age check, not identity or age verification.</small>
+      </section>
+    </main>;
+  }
+
   return <div className="app-shell">
     <header className="topbar">
       <a className="brand" href="#"><span className="brand-icon"><Video size={21}/></span><span>stranger<span className="brand-accent">link</span></span></a>
       <div className="top-status"><span className="live-dot"/>{socket?.connected ? 'Service online' : 'Connecting…'}</div>
-      <div className="header-tag"><Sparkles size={15}/> Meet someone new</div>
+      <div className="header-tag online-members"><span className="live-dot"/><Users size={15}/><span>{onlineCount.toLocaleString()} online</span></div>
       <div className="header-actions">
         <button className="header-action" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'} title={theme === 'light' ? 'Dark mode' : 'Light mode'}>{theme === 'light' ? <Moon size={17}/> : <Sun size={17}/>}<span>{theme === 'light' ? 'Dark mode' : 'Light mode'}</span></button>
         <button className="header-action chat-toggle" onClick={() => setChatOpen(v => !v)} aria-expanded={chatOpen}><MessageCircle size={17}/><span>Chat</span>{chatOpen ? <X size={15}/> : <PanelRightOpen size={15}/>}</button>
@@ -284,6 +314,7 @@ export default function App() {
         <button className="report-button" onClick={report} disabled={!connected}><ShieldAlert size={16}/> Report this user</button>
       </aside></>}
     </main>
+    <button className={`floating-chat-toggle ${chatOpen ? 'is-open' : ''}`} onClick={() => setChatOpen(v => !v)} aria-expanded={chatOpen} aria-label={chatOpen ? 'Close chat' : 'Open chat'}><MessageCircle size={20}/><span>{chatOpen ? 'Close chat' : 'Chat now'}</span>{chatOpen ? <X size={16}/> : null}</button>
     <footer className="footer"><span>© {new Date().getFullYear()} StrangerLink</span><div><a href="#safety">Safety first</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a></div><span className="footer-note">Be kind. Stay safe.</span></footer>
   </div>;
 }
