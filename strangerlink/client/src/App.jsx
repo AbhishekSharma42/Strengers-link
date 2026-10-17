@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { io } from 'socket.io-client';
 import { Video, VideoOff, Mic, MicOff, MessageCircle, ShieldAlert, Shuffle, PhoneOff, Send, Sparkles, Users, Wifi, Camera, Sun, Moon, Rows2, Columns2, Maximize2, PanelRightOpen, X } from 'lucide-react';
 
@@ -346,26 +347,25 @@ export default function App() {
     </main>
     <button className={`floating-chat-toggle ${chatOpen ? 'is-open' : ''}`} onClick={() => setChatOpen(v => !v)} aria-expanded={chatOpen} aria-label={chatOpen ? 'Close chat' : 'Open chat'}><MessageCircle size={20}/><span>{chatOpen ? 'Close chat' : 'Chat now'}</span>{chatOpen ? <X size={16}/> : null}</button>
     <footer className="footer"><span>© {new Date().getFullYear()} StrangerLink</span><div><a href="#safety">Safety first</a><a href="#privacy">Privacy</a><a href="#terms">Terms</a></div><span className="footer-note">Be kind. Stay safe.</span></footer>
-    {permissionStage === 'prompt' && <div className="permission-overlay" role="presentation">
-      <section className="permission-dialog" role="dialog" aria-modal="true" aria-labelledby="permission-title">
-        <div className="permission-icon"><Camera size={24}/><Mic size={20}/></div>
-        <p className="permission-eyebrow">READY FOR VIDEO CHAT?</p>
-        <h2 id="permission-title">Allow camera and microphone</h2>
-        <p>To start a video chat, StrangerLink needs access to your camera and microphone. Your browser will show its own permission prompt next.</p>
-        <div className="permission-actions">
-          <button className="permission-cancel" onClick={cancelPermission}>Not now</button>
-          <button className="permission-allow" onClick={requestMediaAndStart}>Allow &amp; continue</button>
-        </div>
-        <small>You can deny access in your browser at any time.</small>
-      </section>
-    </div>}
-    {permissionStage === 'requesting' && <div className="permission-overlay" role="presentation">
-      <section className="permission-dialog permission-wait-dialog" role="status" aria-live="polite">
-        <div className="permission-icon"><Camera size={24}/><Mic size={20}/></div>
-        <h2>Waiting for permission…</h2>
-        <p>Please choose Allow in your browser’s camera and microphone prompt.</p>
-        <button className="permission-cancel" onClick={cancelPermission}>Cancel</button>
-      </section>
-    </div>}
+    {(permissionStage === 'prompt' || permissionStage === 'requesting') && createPortal(
+      <div className="permission-overlay" role="presentation">
+        {permissionStage === 'prompt' ? <section className="permission-dialog" role="dialog" aria-modal="true" aria-labelledby="permission-title">
+          <div className="permission-icon"><Camera size={24}/><Mic size={20}/></div>
+          <p className="permission-eyebrow">READY FOR VIDEO CHAT?</p>
+          <h2 id="permission-title">Allow camera and microphone</h2>
+          <p>To start a video chat, StrangerLink needs access to your camera and microphone. Your browser will show its own permission prompt next.</p>
+          <div className="permission-actions">
+            <button className="permission-cancel" onClick={cancelPermission}>Not now</button>
+            <button className="permission-allow" onClick={requestMediaAndStart}>Allow &amp; continue</button>
+          </div>
+          <small>You can deny access in your browser at any time.</small>
+        </section> : <section className="permission-dialog permission-wait-dialog" role="status" aria-live="polite">
+          <div className="permission-icon"><Camera size={24}/><Mic size={20}/></div>
+          <h2>Waiting for permission…</h2>
+          <p>Please choose Allow in your browser’s camera and microphone prompt.</p>
+          <button className="permission-cancel" onClick={cancelPermission}>Cancel</button>
+        </section>}
+      </div>, document.body
+    )}
   </div>;
 }
